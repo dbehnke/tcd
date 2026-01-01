@@ -50,10 +50,7 @@ public:
 	void RouteDstPacket(std::shared_ptr<CTranscoderPacket> packet);
 	void RouteDmrPacket(std::shared_ptr<CTranscoderPacket> packet);
 	void Dump(const std::shared_ptr<CTranscoderPacket> packet, const std::string &title) const;
-	void ProcessAGC(int16_t* samples, size_t count, char module) { 
-		if (!g_Conf.IsAGCEnabled()) return;
-		agcs[module].Process(samples, count); 
-	}
+	void ProcessAGC(int16_t* samples, size_t count, char module);
 
 protected:
 	std::atomic<bool> keep_running;

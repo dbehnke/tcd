@@ -43,6 +43,12 @@ int32_t CController::calcNumerator(int32_t db) const
 
 CController::CController() : keep_running(true) {}
 
+void CController::ProcessAGC(int16_t* samples, size_t count, char module)
+{
+	if (!g_Conf.IsAGCEnabled()) return;
+	agcs[module].Process(samples, count);
+}
+
 bool CController::Start()
 {
 	// agc.SetEnabled(g_Conf.IsAGCEnabled()); // logic moved to ProcessAGC
