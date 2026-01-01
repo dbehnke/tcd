@@ -35,6 +35,7 @@
 #define SERVERADDRESS  "ServerAddress"
 #define PORT           "Port"
 #define AGC            "AGC"
+#define AGCTARGET      "AGCTargetLevel"
 
 static inline void split(const std::string &s, char delim, std::vector<std::string> &v)
 {
@@ -67,6 +68,10 @@ static inline void trim(std::string &s) {
 bool CConfigure::ReadData(const std::string &path)
 // returns true on failure
 {
+    // Default AGC defaults
+    agc = false;
+    agc_target_level = -18.0f; // Default requested by user
+
 	std::regex IPv4RegEx = std::regex("^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9])\\.){3,3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9][0-9]|[0-9]){1,1}$", std::regex::extended);
 	std::regex IPv6RegEx = std::regex("^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}(:[0-9a-fA-F]{1,4}){1,1}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|([0-9a-fA-F]{1,4}:){1,1}(:[0-9a-fA-F]{1,4}){1,6}|:((:[0-9a-fA-F]{1,4}){1,7}|:))$", std::regex::extended);
 
@@ -131,6 +136,8 @@ bool CConfigure::ReadData(const std::string &path)
 			usrp_rx = getSigned(key, value);
 		else if (0 == key.compare(AGC))
 			agc = IS_TRUE(value.at(0));
+        else if (0 == key.compare(AGCTARGET))
+            agc_target_level = std::stof(value);
 		else
 			badParam(key);
 	}
@@ -178,6 +185,7 @@ bool CConfigure::ReadData(const std::string &path)
 	std::cout << USRPTXGAIN << " = " << usrp_tx << std::endl;
 	std::cout << USRPRXGAIN << " = " << usrp_rx << std::endl;
 	std::cout << AGC << " = " << (agc ? "true" : "false") << std::endl;
+    if (agc) std::cout << AGCTARGET << " = " << agc_target_level << " dBFS" << std::endl;
 
 	return false;
 }

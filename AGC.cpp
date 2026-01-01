@@ -5,8 +5,8 @@
 CAGC::CAGC() 
     : m_enabled(true)        // ENABLED BY DEFAULT (Critical Fix: was false)
     , m_gain(1.0f)
-    , m_peak_env(0.25f)      // Start assuming target level
-    , m_target_level(0.25f)  // -12 dBFS (0.25) - User requested adjustment (too loud at -9)
+    , m_peak_env(0.126f)     // Start assuming target level
+    , m_target_level(0.126f) // -18 dBFS (0.126) - Default Safe Baseline if config missing
     , m_max_gain(0.9f)       // 0.9 (-1 dB) - User requested to kill USRP pop
 {
     // Time constants

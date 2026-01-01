@@ -19,6 +19,9 @@ public:
     void SetEnabled(bool enabled) { m_enabled = enabled; }
     bool IsEnabled() const { return m_enabled; }
 
+    // Set Target Level (Linear 0.0-1.0)
+    void SetTargetLevel(float level) { m_target_level = level; }
+
 private:
     bool m_enabled;
     float m_gain;

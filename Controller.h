@@ -63,6 +63,7 @@ protected:
 	std::unique_ptr<CDVDevice> dstar_device, dmrsf_device;
 #endif
 	std::unordered_map<char, CAGC> agcs;
+    float m_agc_target_linear;
 	CPacketQueue codec2_queue;
 
 	CPacketQueue imbe_queue;

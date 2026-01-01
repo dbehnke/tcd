@@ -46,6 +46,14 @@ CController::CController() : keep_running(true) {}
 void CController::ProcessAGC(int16_t* samples, size_t count, char module)
 {
 	if (!g_Conf.IsAGCEnabled()) return;
+    
+    // Lazy config update / Ensure valid target
+    // Optimize: only set if changed? For now, assignment is cheap.
+    // Calculate linear target from dBFS config
+    // We should probably cache this calculation but for now let's just do it or rely on Controller::Start to set a member.
+    // Let's rely on a member variable initialized in Start.
+    
+	agcs[module].SetTargetLevel(m_agc_target_linear);
 	agcs[module].Process(samples, count);
 }
 
@@ -54,6 +62,12 @@ bool CController::Start()
 	// agc.SetEnabled(g_Conf.IsAGCEnabled()); // logic moved to ProcessAGC
 
 	if (g_Conf.IsAGCEnabled()) {
+        // Calculate linear target from configured dBFS
+        // 10^(dB/20)
+        float db = g_Conf.GetAGCTargetLevel();
+        m_agc_target_linear = powf(10.0f, db / 20.0f);
+        std::cout << "AGC Configured Target: " << db << " dBFS (Linear: " << m_agc_target_linear << ")" << std::endl;
+
 		usrp_rx_num = 256;
 		// usrp_tx_num = 256; // Don't override TX gain, AGC is only on RX paths!
         usrp_tx_num = calcNumerator(g_Conf.GetGain(EGainType::usrptx));
