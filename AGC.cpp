@@ -5,9 +5,9 @@
 CAGC::CAGC() 
     : m_enabled(false)
     , m_gain(1.0f)
-    , m_peak_env(0.5f)       // Start assuming "nominal" signal
-    , m_target_level(0.5f)   // -6 dBFS (0.5) - Recovered from -20dBFS test
-    , m_max_gain(3.0f)       // +9.5 dB Limit
+    , m_peak_env(0.35f)      // Start assuming target level
+    , m_target_level(0.35f)  // -9 dBFS (0.35) - Matches user's manual attenuation (-6 + -3)
+    , m_max_gain(1.0f)       // 0 dB (1.0) - LIMITER MODE. Do not boost noise/transients.
 {
     // Time constants
     // Attack: Very Fast to catch transients

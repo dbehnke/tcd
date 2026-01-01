@@ -55,8 +55,9 @@ bool CController::Start()
 
 	if (g_Conf.IsAGCEnabled()) {
 		usrp_rx_num = 256;
-		usrp_tx_num = 256;
-		std::cout << "AGC Enabled: Forcing fixed gains to Unity (256)" << std::endl;
+		// usrp_tx_num = 256; // Don't override TX gain, AGC is only on RX paths!
+        usrp_tx_num = calcNumerator(g_Conf.GetGain(EGainType::usrptx));
+		std::cout << "AGC Enabled: Forcing RX gains to Unity (256). Preserving TX gains." << std::endl;
 	} else {
 		usrp_rx_num = calcNumerator(g_Conf.GetGain(EGainType::usrprx));
 		usrp_tx_num = calcNumerator(g_Conf.GetGain(EGainType::usrptx));
