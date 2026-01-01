@@ -137,7 +137,7 @@ void CDV3000::ProcessPacket(const SDV_Packet &p)
 				dump("Improper audio packet:", &p, packet_size(p));
 			buffer_depth--;
 			packet->SetAudioSamples(p.payload.audio3k.samples, true);
-			g_Cont.ProcessAGC((int16_t*)packet->GetAudioSamples(), 160);
+			g_Cont.ProcessAGC(p.payload.audio3k.samples, 160, packet->GetModule());
 		}
 		else
 		{
