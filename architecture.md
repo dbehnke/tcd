@@ -24,8 +24,8 @@ graph TD
         
         Controller -.->|Set Target| AGC_Process
         
-        AGC_Block -- Yes --> AGC_Process["CAGC::Process\n(Normalize to Configured Target)"]
-        AGC_Block -- No --> Gain_Process["Manual Gain\n(Fixed Multiplier)"]
+        AGC_Block -- Yes --> AGC_Process["CAGC::Process<br/>(Normalize to Configured Target)"]
+        AGC_Block -- No --> Gain_Process["Manual Gain<br/>(Fixed Multiplier)"]
         
         AGC_Process --> Encoder["Encoder (Soft/Hard)"]
         Gain_Process --> Encoder
