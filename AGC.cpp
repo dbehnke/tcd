@@ -5,8 +5,8 @@
 CAGC::CAGC() 
     : m_enabled(false)
     , m_gain(1.0f)
-    , m_peak_env(0.25f)      // Start assuming target level
-    , m_target_level(0.25f)  // -12 dBFS (0.25) - Matches user request (approx -6 + -6 dB)
+    , m_peak_env(0.158f)     // Start assuming target level
+    , m_target_level(0.158f) // -16 dBFS (0.158) - User requested adjustment
     , m_max_gain(1.0f)       // 0 dB (1.0) - LIMITER MODE. Do not boost noise/transients.
 {
     // Time constants
