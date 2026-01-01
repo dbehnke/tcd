@@ -5,8 +5,8 @@
 CAGC::CAGC() 
     : m_enabled(false)
     , m_gain(1.0f)
-    , m_peak_env(0.1f)       // Start assuming very quiet to safely ramp up
-    , m_target_level(0.1f)   // -20 dBFS (0.1) - Drastic reduction for sensitive AMBE encoder
+    , m_peak_env(0.5f)       // Start assuming "nominal" signal
+    , m_target_level(0.5f)   // -6 dBFS (0.5) - Recovered from -20dBFS test
     , m_max_gain(3.0f)       // +9.5 dB Limit
 {
     // Time constants
@@ -29,10 +29,10 @@ void CAGC::Process(int16_t* samples, size_t count)
 
         // 2. Track Audio Envelope (Peak Detector)
         if (abs_input > m_peak_env) {
-            // Attack phase (signal getting louder)
-            m_peak_env = (1.0f - m_attack_coeff) * m_peak_env + m_attack_coeff * abs_input;
+            // Attack phase: Instant track of peak to prevent clipping
+            m_peak_env = abs_input;
         } else {
-            // Release phase (signal getting quieter)
+            // Release phase: Slow decay
             m_peak_env = (1.0f - m_release_coeff) * m_peak_env + m_release_coeff * abs_input;
         }
         
@@ -46,13 +46,12 @@ void CAGC::Process(int16_t* samples, size_t count)
         // 4. Limit Gain (Don't boost silence infinitely)
         ideal_gain = std::min(ideal_gain, m_max_gain);
         
-        // 5. Apply Smoothing to Gain changes (prevent clicking)
-        // Simple one-pole filter on the gain itself
+        // 5. Apply Gain Control
         if (ideal_gain < m_gain) {
-             // Attack (Gain Reduction) - Fast
-             m_gain = 0.9f * m_gain + 0.1f * ideal_gain;
+             // Attack (Gain Reduction) - INSTANT to prevent clip
+             m_gain = ideal_gain;
         } else {
-             // Release (Gain Recovery) - Slow
+             // Release (Gain Recovery) - Smoothed
              m_gain = 0.9995f * m_gain + 0.0005f * ideal_gain;
         }
 
