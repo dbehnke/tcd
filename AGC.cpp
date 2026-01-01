@@ -5,9 +5,9 @@
 CAGC::CAGC() 
     : m_enabled(false)
     , m_gain(1.0f)
-    , m_peak_env(0.25f)       // Start assuming "nominal" signal (-12dB)
-    , m_target_level(0.25f)   // -12 dBFS (0.25) to prevent AMBE/YSF clipping
-    , m_max_gain(3.0f)       // +9.5 dB Limit (was 12dB)
+    , m_peak_env(0.1f)       // Start assuming very quiet to safely ramp up
+    , m_target_level(0.1f)   // -20 dBFS (0.1) - Drastic reduction for sensitive AMBE encoder
+    , m_max_gain(3.0f)       // +9.5 dB Limit
 {
     // Time constants
     // Attack: Very Fast to catch transients
