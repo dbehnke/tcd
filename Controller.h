@@ -29,6 +29,11 @@
 #ifdef SW_MODES_ONLY
 #include "PacketQueue.h"
 #endif
+#ifndef SW_MODES_ONLY
+#include "DVSIDevice.h"
+#endif
+
+#include "AGC.h"
 #include "codec2.h"
 #include "DV3000.h"
 #include "DV3003.h"
@@ -45,6 +50,7 @@ public:
 	void RouteDstPacket(std::shared_ptr<CTranscoderPacket> packet);
 	void RouteDmrPacket(std::shared_ptr<CTranscoderPacket> packet);
 	void Dump(const std::shared_ptr<CTranscoderPacket> packet, const std::string &title) const;
+	void ProcessAGC(int16_t* samples, size_t count = 160) { agc.Process(samples, count); }
 
 protected:
 	std::atomic<bool> keep_running;

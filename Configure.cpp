@@ -34,6 +34,7 @@
 #define MODULES        "Modules"
 #define SERVERADDRESS  "ServerAddress"
 #define PORT           "Port"
+#define AGC            "AGC"
 
 static inline void split(const std::string &s, char delim, std::vector<std::string> &v)
 {
@@ -128,6 +129,8 @@ bool CConfigure::ReadData(const std::string &path)
 			usrp_tx = getSigned(key, value);
 		else if (0 == key.compare(USRPRXGAIN))
 			usrp_rx = getSigned(key, value);
+		else if (0 == key.compare(AGC))
+			agc = IS_TRUE(value.at(0));
 		else
 			badParam(key);
 	}
@@ -174,6 +177,7 @@ bool CConfigure::ReadData(const std::string &path)
 	std::cout << DMRGAINOUT << " = " << dmr_out << std::endl;
 	std::cout << USRPTXGAIN << " = " << usrp_tx << std::endl;
 	std::cout << USRPRXGAIN << " = " << usrp_rx << std::endl;
+	std::cout << AGC << " = " << (agc ? "true" : "false") << std::endl;
 
 	return false;
 }
