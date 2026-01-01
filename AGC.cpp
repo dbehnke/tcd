@@ -6,7 +6,7 @@ CAGC::CAGC()
     : m_enabled(false)
     , m_gain(1.0f)
     , m_peak_env(0.5f)       // Start assuming "nominal" signal (-6dB) to prevent initial blast
-    , m_target_level(0.707f) // -3 dBFS
+    , m_target_level(0.5f)   // -6 dBFS (was 0.707 / -3dBFS) to prevent AMBE/YSF clipping
     , m_max_gain(3.0f)       // +9.5 dB Limit (was 12dB)
 {
     // Time constants
