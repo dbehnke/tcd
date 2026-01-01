@@ -11,6 +11,8 @@ graph TD
     Reflector["Reflector (urfd)"] -->|Network Packet| TCD_RX[TCD Receiver]
     TCD_RX -->|Queue Packet| Queues[Encoding Queues]
     
+    Config[Configuration (tcd.ini)] -->|AGCTargetLevel| Controller[Controller]
+    
     subgraph "Transcoding Loop (The Matrix)"
     direction TB
         Queues -->|Pop Packet| Decoder["Decoder (Soft/Hard)"]
@@ -20,7 +22,9 @@ graph TD
         
         PCM --> AGC_Block{AGC Enabled?}
         
-        AGC_Block -- Yes --> AGC_Process["CAGC::Process\n(Normalize to -3dBFS)"]
+        Controller -.->|Set Target| AGC_Process
+        
+        AGC_Block -- Yes --> AGC_Process["CAGC::Process\n(Normalize to Configured Target)"]
         AGC_Block -- No --> Gain_Process["Manual Gain\n(Fixed Multiplier)"]
         
         AGC_Process --> Encoder["Encoder (Soft/Hard)"]
@@ -81,6 +85,11 @@ graph LR
     Encode -->|P25| IMBE_Enc[p25_encode]
     Encode -->|M17| C2_Enc[codec2_encode]
 ```
+
+## Configuration
+
+3. **Parses `tcd.ini`**: Reads `AGC=1` and `AGCTargetLevel` (float).
+2. **Controller**: Calculates linear target from dBFS and updates AGC instances.
 
 ## AGC Algorithm
 
