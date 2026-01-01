@@ -11,7 +11,7 @@ graph TD
     Reflector["Reflector (urfd)"] -->|Network Packet| TCD_RX[TCD Receiver]
     TCD_RX -->|Queue Packet| Queues[Encoding Queues]
     
-    Config[Configuration (tcd.ini)] -->|AGCTargetLevel| Controller[Controller]
+    Config["Configuration (tcd.ini)"] -->|AGCTargetLevel| Controller[Controller]
     
     subgraph "Transcoding Loop (The Matrix)"
     direction TB
@@ -88,7 +88,7 @@ graph LR
 
 ## Configuration
 
-3. **Parses `tcd.ini`**: Reads `AGC=1` and `AGCTargetLevel` (float).
+1. **Parses `tcd.ini`**: Reads `AGC=1` and `AGCTargetLevel` (float).
 2. **Controller**: Calculates linear target from dBFS and updates AGC instances.
 
 ## AGC Algorithm
