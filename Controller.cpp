@@ -47,12 +47,9 @@ void CController::ProcessAGC(int16_t* samples, size_t count, char module)
 {
 	if (!g_Conf.IsAGCEnabled()) return;
     
-    // Lazy config update / Ensure valid target
-    // Optimize: only set if changed? For now, assignment is cheap.
-    // Calculate linear target from dBFS config
-    // We should probably cache this calculation but for now let's just do it or rely on Controller::Start to set a member.
-    // Let's rely on a member variable initialized in Start.
+    std::lock_guard<std::mutex> lock(agc_mux);
     
+    // Lazy config update / Ensure valid target
 	agcs[module].SetTargetLevel(m_agc_target_linear);
 	agcs[module].Process(samples, count);
 }

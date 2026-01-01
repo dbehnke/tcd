@@ -58,6 +58,7 @@ protected:
 	std::unordered_map<char, int16_t[160]> audio_store;
 	std::unordered_map<char, uint8_t[8]> data_store;
 	CTCClient tcClient;
+    std::mutex agc_mux;
 	std::unordered_map<char, std::unique_ptr<CCodec2>> c2_16, c2_32;
 #ifndef SW_MODES_ONLY
 	std::unique_ptr<CDVDevice> dstar_device, dmrsf_device;
