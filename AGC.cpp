@@ -5,8 +5,8 @@
 CAGC::CAGC() 
     : m_enabled(true)        // ENABLED BY DEFAULT (Critical Fix: was false)
     , m_gain(1.0f)
-    , m_peak_env(0.126f)     // Start assuming target level
-    , m_target_level(0.126f) // -18 dBFS (0.126) - User requested extreme test
+    , m_peak_env(0.35f)      // Start assuming target level
+    , m_target_level(0.35f)  // -9 dBFS (0.35) - Restored for testing with 0.9 max gain
     , m_max_gain(0.9f)       // 0.9 (-1 dB) - User requested to kill USRP pop
 {
     // Time constants
