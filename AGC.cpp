@@ -7,7 +7,7 @@ CAGC::CAGC()
     , m_gain(1.0f)
     , m_peak_env(0.126f)     // Start assuming target level
     , m_target_level(0.126f) // -18 dBFS (0.126) - User requested extreme test
-    , m_max_gain(1.0f)       // 0 dB (1.0) - LIMITER MODE. Do not boost noise.
+    , m_max_gain(0.9f)       // 0.9 (-1 dB) - User requested to kill USRP pop
 {
     // Time constants
     // Attack: INSTANT (handled in Process)
