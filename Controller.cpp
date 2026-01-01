@@ -23,6 +23,7 @@
 #include <sstream>
 #include <fstream>
 #include <thread>
+#include <unordered_set>
 #include <queue>
 #ifdef USE_SW_AMBE2
 #include <md380_vocoder.h>
@@ -316,6 +317,18 @@ void CController::ReadReflectorThread()
 			// there is only one CTranscoderPacket created for each new STCPacket received from the reflector
 			auto packet = std::make_shared<CTranscoderPacket>(*queue.front());
 			queue.pop();
+            
+            // Safety check: Ensure module is configured before processing
+            if (g_Conf.GetTCMods().find(packet->GetModule()) == std::string::npos) {
+                 static std::unordered_set<char> warned_modules;
+                 if (warned_modules.find(packet->GetModule()) == warned_modules.end()) {
+                     std::cerr << "Warning: Received packet for unconfigured module " << packet->GetModule() 
+                               << ". Dropping. Please configure 'Modules' in tcd.ini to include this module." << std::endl;
+                     warned_modules.insert(packet->GetModule());
+                 }
+                 continue;
+            }
+
 			switch (packet->GetCodecIn())
 			{
 #ifndef SW_MODES_ONLY
