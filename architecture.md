@@ -8,22 +8,22 @@ This document details the internal data flow of the Transcoder (TCD) and the inj
 
 ```mermaid
 graph TD
-    Reflector[Reflector (urfd)] -->|Network Packet| TCD_RX[TCD Receiver]
+    Reflector["Reflector (urfd)"] -->|Network Packet| TCD_RX[TCD Receiver]
     TCD_RX -->|Queue Packet| Queues[Encoding Queues]
     
     subgraph "Transcoding Loop (The Matrix)"
     direction TB
-        Queues -->|Pop Packet| Decoder[Decoder (Soft/Hard)]
-        Decoder -->|PCM Audio| PCM[Raw PCM 16-bit]
+        Queues -->|Pop Packet| Decoder["Decoder (Soft/Hard)"]
+        Decoder -->|PCM Audio| PCM["Raw PCM 16-bit"]
         
         style PCM fill:#f96,stroke:#333,stroke-width:2px,color:#000
         
         PCM --> AGC_Block{AGC Enabled?}
         
-        AGC_Block -- Yes --> AGC_Process[CAGC::Process\n(Normalize to -3dBFS)]
-        AGC_Block -- No --> Gain_Process[Manual Gain\n(Fixed Multiplier)]
+        AGC_Block -- Yes --> AGC_Process["CAGC::Process\n(Normalize to -3dBFS)"]
+        AGC_Block -- No --> Gain_Process["Manual Gain\n(Fixed Multiplier)"]
         
-        AGC_Process --> Encoder[Encoder (Soft/Hard)]
+        AGC_Process --> Encoder["Encoder (Soft/Hard)"]
         Gain_Process --> Encoder
         
         Encoder -->|Encoded Packet| TCD_TX[TCD Sender]

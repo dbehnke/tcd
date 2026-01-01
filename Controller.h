@@ -62,6 +62,7 @@ protected:
 #ifndef SW_MODES_ONLY
 	std::unique_ptr<CDVDevice> dstar_device, dmrsf_device;
 #endif
+	CAGC agc;
 	CPacketQueue codec2_queue;
 
 	CPacketQueue imbe_queue;
