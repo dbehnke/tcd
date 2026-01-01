@@ -5,22 +5,15 @@
 CAGC::CAGC() 
     : m_enabled(false)
     , m_gain(1.0f)
-    , m_peak_env(0.0f)
-    , m_target_level(0.707f) // -3 dBFS (approx 23170 for 16-bit)
-    , m_max_gain(4.0f)       // +12 dB
+    , m_peak_env(0.5f)       // Start assuming "nominal" signal (-6dB) to prevent initial blast
+    , m_target_level(0.707f) // -3 dBFS
+    , m_max_gain(3.0f)       // +9.5 dB Limit (was 12dB)
 {
-    // Time constants for 8kHz sample rate
-    // Attack: Fast (e.g. 10ms) -> coeff ~= 0.8
-    // Release: Slow (e.g. 500ms) -> coeff ~= 0.0005 per sample
+    // Time constants
+    // Attack: Very Fast to catch transients
+    m_attack_coeff = 0.5f; 
     
-    // Simplified per-block logic or per-sample? 
-    // Let's do per-sample for smooth envelope tracking, but efficiency matters.
-    // Given 160-sample blocks (20ms), per-sample is fine.
-    
-    // Attack (reduce gain quickly to prevent clipping)
-    m_attack_coeff = 0.1f; 
-    
-    // Release (increase gain slowly)
+    // Release: Slow
     m_release_coeff = 0.0002f;
 }
 
