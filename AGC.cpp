@@ -3,14 +3,14 @@
 #include <iostream>
 
 CAGC::CAGC() 
-    : m_enabled(false)
+    : m_enabled(true)        // ENABLED BY DEFAULT (Critical Fix: was false)
     , m_gain(1.0f)
-    , m_peak_env(0.158f)     // Start assuming target level
-    , m_target_level(0.158f) // -16 dBFS (0.158) - User requested adjustment
-    , m_max_gain(1.0f)       // 0 dB (1.0) - LIMITER MODE. Do not boost noise/transients.
+    , m_peak_env(0.35f)      // Start assuming target level
+    , m_target_level(0.35f)  // -9 dBFS (0.35) - Matches user's known good manual settings
+    , m_max_gain(1.0f)       // 0 dB (1.0) - LIMITER MODE. Do not boost noise.
 {
     // Time constants
-    // Attack: Very Fast to catch transients
+    // Attack: INSTANT (handled in Process)
     m_attack_coeff = 0.5f; 
     
     // Release: Slow
