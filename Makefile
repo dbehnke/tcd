@@ -14,6 +14,7 @@ CXXFLAGS = $(GCC_FLAGS) -std=c++17
 
 ifeq ($(swambe2), true)
 CFLAGS+= -DUSE_SW_AMBE2
+CXXFLAGS+= -DUSE_SW_AMBE2
 endif
 
 LDFLAGS = -limbe_vocoder -pthread -lnng
@@ -24,6 +25,7 @@ endif
 
 ifeq ($(swmodes), true)
 CFLAGS+= -DSW_MODES_ONLY
+CXXFLAGS+= -DSW_MODES_ONLY
 else
 LDFLAGS += -lftd2xx
 endif
