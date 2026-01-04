@@ -6,6 +6,10 @@
   https://github.com/drowe67/codec2
 */
 
+#ifdef __cplusplus
+#define _Static_assert static_assert
+#endif
+
 #include <stdint.h>
 #include <math.h>
 
