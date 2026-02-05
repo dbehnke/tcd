@@ -4,11 +4,15 @@ include tcd.mk
 
 GCC = g++
 
+BUILD_VERSION ?= dev
+
 ifeq ($(debug), true)
 CFLAGS = -ggdb3 -W -Werror -Icodec2 -MMD -MD -std=c++17
 else
 CFLAGS = -W -Werror -Icodec2 -MMD -MD -std=c++17
 endif
+
+CFLAGS += -DBUILD_VERSION=\"$(BUILD_VERSION)\"
 
 ifeq ($(swambe2), true)
 CFLAGS+= -DUSE_SW_AMBE2

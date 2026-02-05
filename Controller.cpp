@@ -35,6 +35,9 @@
 
 extern CConfigure g_Conf;
 
+// Default runtime vocoder mode is Auto (probe for hardware, fallback to software)
+CController::EVocoderMode CController::g_VocoderMode = CController::EVocoderMode::Auto;
+
 int32_t CController::calcNumerator(int32_t db) const
 {
 	float num = 256.0f * powf(10.0f, (float(db)/20.0f));
@@ -135,7 +138,34 @@ bool CController::InitVocoders()
 bool CController::DiscoverFtdiDevices(std::list<std::pair<std::string, std::string>> &found)
 {
 	int iNbDevices = 0;
-	auto status = FT_CreateDeviceInfoList((LPDWORD)&iNbDevices);
+	// Unit-test hook: allow compile-time enabling of a simulator. When
+	// compiled with -DUNIT_TEST_FTDI, the environment variable
+	// SIMULATE_FTDI can be set to 0/1/2 to simulate that many devices.
+#ifdef UNIT_TEST_FTDI
+	const char *sim = getenv("SIMULATE_FTDI");
+	if (sim && *sim) {
+		iNbDevices = atoi(sim);
+		std::cout << "UNIT_TEST_FTDI: simulating " << iNbDevices << " FTDI devices" << std::endl;
+		// Populate the 'found' list with fake serial/description pairs so the
+		// rest of InitVocoders can proceed without calling FTDI library APIs.
+		for (int i = 0; i < iNbDevices; ++i) {
+			std::stringstream ss;
+			ss << "SIMSN" << (1000 + i);
+			std::string serial = ss.str();
+			std::string desc = (i % 2 == 0) ? "USB-3003 Device" : "USB-3000 Device";
+			found.emplace_back(serial, desc);
+		}
+		return false;
+	}
+#endif
+	{
+		auto status = FT_CreateDeviceInfoList((LPDWORD)&iNbDevices);
+		if (FT_OK != status)
+		{
+			std::cerr << "Could not create FTDI device list" << std::endl;
+			return true;
+		}
+	}
 	if (FT_OK != status)
 	{
 		std::cerr << "Could not create FTDI device list" << std::endl;
@@ -192,8 +222,29 @@ bool CController::InitVocoders()
 		return true;
 
 	if (deviceset.empty()) {
-		std::cerr << "could not find a device!" << std::endl;
+		// No hardware devices found. Honor runtime mode selection.
+		if (EVocoderMode::Hardware == CController::g_VocoderMode) {
+			std::cerr << "No DVSI devices found and hardware mode forced; aborting." << std::endl;
+			return true;
+		}
+
+		// Auto or Software mode: fall back to software vocoders if available
+		std::cout << "No DVSI devices found; falling back to software vocoders" << std::endl;
+#ifdef USE_SW_AMBE2
+		md380_init();
+		if (g_Conf.IsAGCEnabled()) {
+			ambe_in_num = 256;
+			ambe_out_num = 256;
+		} else {
+			ambe_in_num = calcNumerator(g_Conf.GetGain(EGainType::dmrin));
+			ambe_out_num = calcNumerator(g_Conf.GetGain(EGainType::dmrout));
+		}
+		// No hardware devices to open; software-only initialization complete
+		return false;
+#else
+		std::cerr << "Software AMBE support not compiled in; cannot run without hardware devices" << std::endl;
 		return true;
+#endif
 	}
 
 	if (2 != deviceset.size())
@@ -333,7 +384,7 @@ void CController::ReadReflectorThread()
 			{
 #ifndef SW_MODES_ONLY
 			case ECodecType::dstar:
-				dstar_device->AddPacket(packet);
+				if (dstar_device) dstar_device->AddPacket(packet);
 				break;
 #endif
 			case ECodecType::dmr:
@@ -341,7 +392,7 @@ void CController::ReadReflectorThread()
 				swambe2_queue.push(packet);
 #else
 #ifndef SW_MODES_ONLY
-				dmrsf_device->AddPacket(packet);
+				if (dmrsf_device) dmrsf_device->AddPacket(packet);
 #endif
 #endif
 				break;
@@ -460,14 +511,14 @@ void CController::Codec2toAudio(std::shared_ptr<CTranscoderPacket> packet)
 	}
 	// the only thing left is to encode the two ambe, so push the packet onto both AMBE queues
 #ifndef SW_MODES_ONLY
-	dstar_device->AddPacket(packet);
+	if (dstar_device) dstar_device->AddPacket(packet);
 #endif
 #ifdef USE_SW_AMBE2
 	md380_encode_fec(ambe2, (int16_t *)packet->GetAudioSamples());
 	packet->SetDMRData(ambe2);
 #else
 #ifndef SW_MODES_ONLY
-	dmrsf_device->AddPacket(packet);
+	if (dmrsf_device) dmrsf_device->AddPacket(packet);
 #endif
 #endif
 	p25vocoder.encode_4400((int16_t*)packet->GetAudioSamples(), imbe);
@@ -541,7 +592,7 @@ void CController::SWAMBE2toAudio(std::shared_ptr<CTranscoderPacket> packet)
 	ProcessAGC(tmp, 160, packet->GetModule());
 	packet->SetAudioSamples(tmp, false);
 #ifndef SW_MODES_ONLY
-	dstar_device->AddPacket(packet);
+	if (dstar_device) dstar_device->AddPacket(packet);
 #endif
 	codec2_queue.push(packet);
 	imbe_queue.push(packet);
@@ -591,7 +642,7 @@ void CController::IMBEtoAudio(std::shared_ptr<CTranscoderPacket> packet)
 	ProcessAGC(tmp, 160, packet->GetModule());
 	packet->SetAudioSamples(tmp, false);
 #ifndef SW_MODES_ONLY
-	dstar_device->AddPacket(packet);
+	if (dstar_device) dstar_device->AddPacket(packet);
 #endif
 	codec2_queue.push(packet);
 
@@ -599,7 +650,7 @@ void CController::IMBEtoAudio(std::shared_ptr<CTranscoderPacket> packet)
 	swambe2_queue.push(packet);
 #else
 #ifndef SW_MODES_ONLY
-	dmrsf_device->AddPacket(packet);
+	if (dmrsf_device) dmrsf_device->AddPacket(packet);
 #endif
 #endif
 
@@ -680,7 +731,7 @@ void CController::USRPtoAudio(std::shared_ptr<CTranscoderPacket> packet)
 	swambe2_queue.push(packet);
 #else
 #ifndef SW_MODES_ONLY
-	dmrsf_device->AddPacket(packet);
+	if (dmrsf_device) dmrsf_device->AddPacket(packet);
 #endif
 #endif
 

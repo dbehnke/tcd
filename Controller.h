@@ -44,6 +44,11 @@ class CController
 public:
 	std::mutex dstar_mux, dmrst_mux;
 
+	enum class EVocoderMode { Auto, Hardware, Software };
+
+	// Global mode selection (default Auto). Main.cpp may set this before Start().
+	static EVocoderMode g_VocoderMode;
+
 	CController();
 	bool Start();
 	void Stop();
