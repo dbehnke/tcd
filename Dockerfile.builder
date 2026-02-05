@@ -15,7 +15,6 @@ RUN apt-get update && apt-get install -y \
     libfmt-dev \
     libopus-dev \
     libogg-dev \
-    libusb-1.0-0-dev \
     unzip \
     python3 \
     golang-go \
@@ -24,20 +23,6 @@ RUN apt-get update && apt-get install -y \
     xxd \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
-
-# Install FTDI D2XX SDK (libftd2xx) for hardware DVSI device support
-RUN mkdir -p /tmp/ftdi && cd /tmp/ftdi && \
-    wget -q "https://ftdichip.com/wp-content/uploads/2021/08/libftd2xx1.4.27.tar.gz" -O ftd2xx.tar.gz && \
-    tar xzf ftd2xx.tar.gz && \
-    FTD2XX_DIR=$(ls -d libftd2xx* 2>/dev/null | head -1) && \
-    if [ -n "$FTD2XX_DIR" ]; then \
-        cp "$FTD2XX_DIR/ftd2xx.h" /usr/local/include/ && \
-        cp "$FTD2XX_DIR/WinTypes.h" /usr/local/include/ && \
-        cp "$FTD2XX_DIR/x86_64/libftd2xx.a" /usr/local/lib/ 2>/dev/null || \
-        cp "$FTD2XX_DIR"/*.a /usr/local/lib/ 2>/dev/null || true && \
-        ldconfig; \
-    fi && \
-    rm -rf /tmp/ftdi
 
 FROM base AS imbe-builder
 
