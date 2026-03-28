@@ -77,4 +77,17 @@ Use:
 - `sudo journalctl -u tcd -f` to monitor the logs.
 - `sudo make uninstall` to uninstall *tcd*.
 
-When started, *tcd* will establish a TCP connection for each transcoded reflector module. If the TCP connection is lost, *tcd* will block until the connection is reestablished. A message will be printed every 10 seconds suggesting that the reflector needs to be restarted.
+When started, *tcd* will establish a TCP connection for each transcoded reflector module. If the TCP connection is lost, *tcd* will block until the connection is reestablished. A message will be printed every 10 seconds suggesting that the reflector needs to be restarted. 
+
+Wrapper and software-only mode
+--------------------------------
+
+The packaging includes a small wrapper `/usr/bin/urfd-tcd-run` which the
+systemd unit invokes. The wrapper detects whether FTDI hardware is available
+and selects hardware or software vocoding accordingly. To override the auto
+behavior set the environment variable `URFD_TCD_MODE` to one of `auto`,
+`hardware`, or `software`.
+
+In containerized tests or software-only deployments (no AMBE dongles), you
+can force software mode by setting `URFD_TCD_MODE=software` or leaving the
+wrapper in `auto` so it falls back to software mode automatically.

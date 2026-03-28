@@ -29,6 +29,11 @@
 #ifdef SW_MODES_ONLY
 #include "PacketQueue.h"
 #endif
+#ifndef SW_MODES_ONLY
+#include "DVSIDevice.h"
+#endif
+
+#include "AGC.h"
 #include "codec2.h"
 #include "DV3000.h"
 #include "DV3003.h"
@@ -39,12 +44,18 @@ class CController
 public:
 	std::mutex dstar_mux, dmrst_mux;
 
+	enum class EVocoderMode { Auto, Hardware, Software };
+
+	// Global mode selection (default Auto). Main.cpp may set this before Start().
+	static EVocoderMode g_VocoderMode;
+
 	CController();
 	bool Start();
 	void Stop();
 	void RouteDstPacket(std::shared_ptr<CTranscoderPacket> packet);
 	void RouteDmrPacket(std::shared_ptr<CTranscoderPacket> packet);
 	void Dump(const std::shared_ptr<CTranscoderPacket> packet, const std::string &title) const;
+	void ProcessAGC(int16_t* samples, size_t count, char module);
 
 protected:
 	std::atomic<bool> keep_running;
@@ -52,10 +63,13 @@ protected:
 	std::unordered_map<char, int16_t[160]> audio_store;
 	std::unordered_map<char, uint8_t[8]> data_store;
 	CTCClient tcClient;
+    std::mutex agc_mux;
 	std::unordered_map<char, std::unique_ptr<CCodec2>> c2_16, c2_32;
 #ifndef SW_MODES_ONLY
 	std::unique_ptr<CDVDevice> dstar_device, dmrsf_device;
 #endif
+	std::unordered_map<char, CAGC> agcs;
+    float m_agc_target_linear;
 	CPacketQueue codec2_queue;
 
 	CPacketQueue imbe_queue;

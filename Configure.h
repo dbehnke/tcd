@@ -34,11 +34,15 @@ public:
 	std::string GetTCMods(void) const { return tcmods; }
 	std::string GetAddress(void) const { return address; }
 	unsigned GetPort(void) const { return port; }
+	bool IsAGCEnabled(void) const { return agc; }
+    float GetAGCTargetLevel(void) const { return agc_target_level; }
 
 private:
 	// CFGDATA data;
 	std::string tcmods, address;
 	uint16_t port;
+	bool agc;
+    float agc_target_level;
 	int dstar_in, dstar_out, dmr_in, dmr_out, usrp_tx, usrp_rx;
 
 	int getSigned(const std::string &key, const std::string &value) const;
