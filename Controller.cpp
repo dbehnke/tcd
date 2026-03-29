@@ -117,6 +117,8 @@ bool CController::InitVocoders()
 	{
 		c2_16[c] = std::unique_ptr<CCodec2>(new CCodec2(false));
 		c2_32[c] = std::unique_ptr<CCodec2>(new CCodec2(true));
+        // Initialize one imbe_vocoder per module
+        p25vocoders.emplace(c, imbe_vocoder());
 	}
 	
 #ifdef USE_SW_AMBE2
@@ -183,6 +185,8 @@ bool CController::InitVocoders()
 	{
 		c2_16[c] = std::unique_ptr<CCodec2>(new CCodec2(false));
 		c2_32[c] = std::unique_ptr<CCodec2>(new CCodec2(true));
+        // Initialize one imbe_vocoder per module
+        p25vocoders.emplace(c, imbe_vocoder());
 	}
 
 	// the 3000 or 3003 devices
@@ -470,7 +474,8 @@ void CController::Codec2toAudio(std::shared_ptr<CTranscoderPacket> packet)
 	dmrsf_device->AddPacket(packet);
 #endif
 #endif
-	p25vocoder.encode_4400((int16_t*)packet->GetAudioSamples(), imbe);
+	p25vocoders[packet->GetModule()].encode_4400((int16_t*)packet->GetAudioSamples(), imbe);
+    // p25vocoder.encode_4400((int16_t*)packet->GetAudioSamples(), imbe);
 	packet->SetP25Data(imbe);
 	packet->SetUSRPData((int16_t*)packet->GetAudioSamples());
 	
@@ -576,7 +581,8 @@ void CController::AudiotoIMBE(std::shared_ptr<CTranscoderPacket> packet)
 {
 	uint8_t imbe[11];
 
-	p25vocoder.encode_4400((int16_t *)packet->GetAudioSamples(), imbe);
+	p25vocoders[packet->GetModule()].encode_4400((int16_t *)packet->GetAudioSamples(), imbe);
+    // p25vocoder.encode_4400((int16_t *)packet->GetAudioSamples(), imbe);
 	packet->SetP25Data(imbe);
 	// we might be all done...
 	send_mux.lock();
@@ -587,7 +593,8 @@ void CController::AudiotoIMBE(std::shared_ptr<CTranscoderPacket> packet)
 void CController::IMBEtoAudio(std::shared_ptr<CTranscoderPacket> packet)
 {
 	int16_t tmp[160] = { 0 };
-	p25vocoder.decode_4400(tmp, (uint8_t*)packet->GetP25Data());
+	p25vocoders[packet->GetModule()].decode_4400(tmp, (uint8_t*)packet->GetP25Data());
+    // p25vocoder.decode_4400(tmp, (uint8_t*)packet->GetP25Data());
 	ProcessAGC(tmp, 160, packet->GetModule());
 	packet->SetAudioSamples(tmp, false);
 #ifndef SW_MODES_ONLY
